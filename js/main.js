@@ -125,7 +125,25 @@ glbloader.load(glbUrls[1], function (gltf) {
 } );
 
 // スマホの描写
-// ここに記述
+glbloader.load(
+    glbUrls[2],
+    function (gltf) {
+    var model;
+    for (var g = 1; g < 10; g++) {
+        model = gltf.scene.clone();
+        model.scale.set(15, 15, 15);
+        model.rotation.set(0, Math.PI / 4, Math.PI / 4);
+        const randomIndex = Math.floor(Math.random() * 3); // 0,1,2のランダム
+        model.position.set(course[randomIndex], 2, -10 * g);
+        phone_list.push(model); // オブジェクトのバウンディングボックスを計算
+        scene.add(model);
+    }
+    },
+    undefined,
+    function (error) {
+    console.error(error);
+    }
+);
 
 // 障害物の描写
 for (var g=1 ; g<12 ; g++ ){
@@ -152,7 +170,23 @@ textureloader.load(textureUrls[0], function (texture) {
 } );
 
 // ゴールテープの描写
-// ここに記述
+textureloader.load(
+    textureUrls[1],
+    function (texture) {
+      const goalGeometry = new BoxGeometry(24, 10, 0.5); // 地面のジオメトリを作成 (BoxGeometry)
+      var sphereMaterial = new MeshPhongMaterial();
+      sphereMaterial.map = texture;
+      goal = new Mesh(goalGeometry, sphereMaterial); // メッシュを作成 (ジオメトリ + マテリアル)
+      goal.position.set(0, 5, -200);
+      goalBoundingBox = new Box3().setFromObject(goal);
+      // ground.receiveShadow = true; // 影を受け取る設定
+      scene.add(goal);
+    },
+    undefined,
+    function (error) {
+      console.error(error);
+    }
+  );
 
 // センサーの値の読み取り
 document.addEventListener("DOMContentLoaded", function () {
