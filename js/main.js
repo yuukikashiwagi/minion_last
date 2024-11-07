@@ -98,7 +98,7 @@ const textureUrls = [
 
 // 読み込むGLBモデルのパス
 const glbUrls = [
-    'models/player',// プレイヤー
+    'models/player.glb',// プレイヤー
     'models/houses.glb',// 周りの建物
     'models/phone.glb', // スマホ
 ];
@@ -108,7 +108,34 @@ const textureloader = new TextureLoader();
 const glbloader = new GLTFLoader();
 
 // プレイヤーの描写
-// ここに記述
+// プレイヤー
+glbloader.load(
+    glbUrls[0],
+    function (gltf) {
+      player = gltf.scene;
+      player.scale.set(3, 2, 3);
+      player.rotation.set(0, Math.PI, 0);
+      player.position.set(0, 0, 0);
+
+      // 追加
+      mixer = new AnimationMixer(player); // 解説 1
+      const runningAction = gltf.animations.find(
+        (animation) => animation.name === "running"
+      ); // 解説 2
+      if (runningAction) {
+        mixer.clipAction(runningAction).play(); // 解説 3
+      } else {
+        console.warn("Running animation not found in the model.");
+      }
+      // ここまで追加
+
+      scene.add(player);
+    },
+    undefined,
+    function (error) {
+      console.error(error);
+    }
+  );
 
 // 建物の描写
 glbloader.load(glbUrls[1], function (gltf) {
@@ -196,10 +223,18 @@ document.addEventListener("DOMContentLoaded", function () {
     // 加速度センサの値の取得
     if (ios){
         // iosの時
-        // ここに追加
+        window.addEventListener("devicemotion", (dat) => {
+            aX = dat.accelerationIncludingGravity.x || 0;
+            aY = dat.accelerationIncludingGravity.y || 0;
+            aZ = dat.accelerationIncludingGravity.z || 0;
+        });
     }else{
         // androidの時
-        // ここに追加
+        window.addEventListener("devicemotion", (dat) => {
+            aX = -dat.accelerationIncludingGravity.x || 0;
+            aY = -dat.accelerationIncludingGravity.y || 0;
+            aZ = -dat.accelerationIncludingGravity.z || 0;
+        });
     }
     
     // 一度だけ実行
@@ -209,11 +244,20 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
     // ジャイロセンサーの値の取得
-    // ここに追加
+    window.addEventListener(
+        "deviceorientation",
+        (event) => {
+          alpha = event.alpha || 0;
+          beta = event.beta || 0;
+          gamma = event.gamma || 0;
+          console.log("Gyro:", alpha, beta, gamma);
+        },
+        false
+    );
 
     // 一定時間ごとに
     var graphtimer = window.setInterval(() => {
-        // ここに追加
+        displayData();
     }, 33); 
 
     function displayData() {
@@ -228,9 +272,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 })
 
-// プレイヤーの左右移動
+// プレイヤーの移動
 function move(){
-    // ここに追加
+    player.position.z -= 0.2;
 }
 
 // プレイヤーのジャンプ
@@ -273,10 +317,12 @@ function animate(){
     const animationId = requestAnimationFrame(animate);
 
     // Mixer
-    // ここに追加
+    if (mixer) {
+        mixer.update(0.01); // delta time（時間の経過量）
+    }
 
     // 移動関数の実行
-    // ここに追加
+    move();
 
     // ジャンプ関数の実行
     // ここに追加
@@ -285,7 +331,10 @@ function animate(){
     // ここに追加
 
     // カメラの移動
-    // ここに追加
+    if (player) {
+        camera.position.set(0, 8, player.position.z + 10);
+        camera.lookAt(new Vector3(0, 5, player.position.z));
+    }
     
     renderer.render(scene, camera);
 }
