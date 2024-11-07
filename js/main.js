@@ -309,22 +309,40 @@ function jump() {
 
 // 衝突判定
 function collision(){
-    box_X = 0;
-    box_Y = 0;
-    box_Z = 0; // サイズが合うように変えてみましょう。
+    box_X = 3;
+    box_Y = 4;
+    box_Z = 2; // サイズが合うように変えてみましょう。
     var geometry = new BoxGeometry(box_X,box_Y,box_Z)
     const material = new MeshPhongMaterial({color: 0xFF0000});
     playerBox = new Mesh(geometry, material);
-    playerBox.position.set(player.position.x,player.position.y + box_Y,player.position.z)
+    playerBox.position.set(player.position.x,player.position.y + box_Y/2,player.position.z)
     playerBox.updateWorldMatrix(true, true);
     const playerBoundingBox = new Box3().setFromObject(playerBox);
     const playerHelper = new Box3Helper(playerBoundingBox, 0xff0000);
-    scene.add(playerHelper);
+    // scene.add(playerHelper);
     // 障害物との衝突
-    // ここに追加
+    enemy_list = enemy_list.filter((enemy) => {
+        const enemyBoundingBox = new Box3().setFromObject(enemy);
+        var enemyHelper = new Box3Helper(enemyBoundingBox, 0xff0000);
+        // scene.add(enemyHelper);
+        if (playerBoundingBox.intersectsBox(enemyBoundingBox)) {
+            window.location.href = "./index.html";
+            return false; // この敵を削除
+          }
+          return true; // この敵を保持
+      });
 
     // スマホとの衝突 
-    // ここに追加
+    phone_list = phone_list.filter((phone) => {
+        const phoneBoundingBox = new Box3().setFromObject(phone);
+        var phoneHelper = new Box3Helper(phoneBoundingBox, 0xff0000);
+        // scene.add(phoneHelper);
+        if (playerBoundingBox.intersectsBox(phoneBoundingBox)) {
+            scene.remove(phone);
+            return false; // このスマホを削除
+          }
+          return true; // このスマホを保持
+      });
 
     // ゴールテープとの衝突
     if (goal){
@@ -353,7 +371,7 @@ function animate(){
     jump();
 
     // 衝突判定関数の実行
-    // ここに追加
+    collision();
 
     // カメラの移動
     if (player) {
