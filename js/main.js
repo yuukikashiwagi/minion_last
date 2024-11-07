@@ -103,6 +103,10 @@ const glbUrls = [
     'models/phone.glb', // スマホ
 ];
 
+// エリアで用いられる 3D モデルと写真のダウンロード
+const textureloader = new TextureLoader();
+const glbloader = new GLTFLoader();
+
 // プレイヤーの描写
 // ここに記述
 
