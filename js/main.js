@@ -274,7 +274,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // プレイヤーの移動
 function move(){
-    player.position.z -= 0.2;
+    // player.position.z -= 0.2;
+    if (gamma > 20) {
+        index += 1;
+        player.position.x = course[index];
+    } else if (gamma < -20) {
+        index -= 1;
+        player.position.x = course[index];
+    }
 }
 
 // プレイヤーのジャンプ
